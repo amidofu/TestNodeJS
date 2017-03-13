@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+	<!--
+	<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0; user-scalable=0;">
+	-->
+	<meta name="viewport" content="width=640, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <title>title</title>
+	<!--
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js"></script>
+	-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+	
+	<style>
+		#direction_control{
+			position: absolute;
+			top: 0;
+			padding: 20px;
+			background: red;
+			width: 240px;
+			height: 240px;
+		}
+	</style>
+  </head>
+  <body>
+    <!-- page content -->
+	hello hi
+	<div id='direction_control'></div>
+	<script type='text/javascript'>
+	
+	
+	var direction_control =  document.querySelector("#direction_control");
+	var direction_rect = direction_control.getBoundingClientRect();
+	var direction_centerX = direction_rect.left + direction_rect.width / 2;
+	var direction_centerY = direction_rect.top + direction_rect.height / 2;
+
+	//window.screen.lockOrientation('landscape-primary');
+	var socket = io.connect();
+	console.log(socket);
+	socket.on('server_connected', function() {
+		socket.emit('controller_connected', socket.id);
+	});
+	var touchobj, controllerUpdateHandle;
+	
+	function controllerUpdate()
+	{
+		var xCoordinate = touchobj.clientX - direction_centerX;
+		var yCoordinate = direction_centerY - touchobj.clientY;
+		var length = Math.sqrt(xCoordinate * xCoordinate + yCoordinate * yCoordinate);
+		var normX = xCoordinate / length;
+		var normY = yCoordinate / length;
+		if(length > 1)
+		{
+			length = 1;
+		}
+		socket.emit('controller_update', normX, normY, length);
+	}
+	
+	function handleStart(event) {
+		//direction_control.style.backgroundColor = "green";
+		event.preventDefault();
+		touchobj = event.changedTouches[0];
+		controllerUpdateHandle = setInterval(controllerUpdate, 15);
+	}	
+	
+	function handleMove(event) {
+		//direction_control.style.backgroundColor = "green";
+		event.preventDefault();
+		touchobj = event.changedTouches[0];
+		/*
+		var touchobj = event.changedTouches[0];
+		//var xCoordinate = event.touches[0].clientX - direction_centerX;
+		var xCoordinate = touchobj.clientX - direction_centerX;
+		//var yCoordinate = event.touches[0].clientY - direction_centerY;
+		var yCoordinate = direction_centerY - touchobj.clientY;
+		//console.log(xCoordinate, yCoordinate);
+		var length = Math.sqrt(xCoordinate * xCoordinate + yCoordinate * yCoordinate);
+		var normX = xCoordinate / length;
+		var normY = yCoordinate / length;
+		if(length > 1)
+		{
+			length = 1;
+		}
+		socket.emit('controller_update', normX, normY, length);
+		*/
+	}	
+	
+	function handleEnd(event) 
+	{
+		event.preventDefault();
+		clearInterval(controllerUpdateHandle);
+	}
+	
+	direction_control.addEventListener("touchstart", handleStart, false);
+	direction_control.addEventListener("touchmove", handleMove, false);	
+	direction_control.addEventListener("touchend", handleEnd, false);
+	/*	
+	direction_control.addEventListener('click', function(event) {
+        event.preventDefault();
+		//var xCoordinate = event.touches[0].clientX - direction_centerX;
+		var xCoordinate = event.clientX - direction_centerX;
+		//var yCoordinate = event.touches[0].clientY - direction_centerY;
+		var yCoordinate = direction_centerY - event.clientY;
+		//console.log(xCoordinate, yCoordinate);
+		var length = Math.sqrt(xCoordinate * xCoordinate + yCoordinate * yCoordinate);
+		var normX = xCoordinate / length;
+		var normY = yCoordinate / length;
+		if(length > 1)
+		{
+			length = 1;
+		}
+		socket.emit('controller_update', normX, normY, length);
+    }, false);
+	*/
+	</script>
+  </body>
+</html>
