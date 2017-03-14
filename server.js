@@ -18,10 +18,15 @@ var express = require('express'),
 	router = express.Router(),
     server = http.createServer(app),
     sio = require('socket.io').listen(server),
-    port = 8080,
+    port = process.env.PORT || 5000,
     game_sockets = {},
     controller_sockets = {};
-
+app.set('port', port);
+/*
+app.listen(app.get('port'), function() {
+  console.log('Node app is running on port', app.get('port'));
+});
+*/
 server.listen(port);
 	// Serve static files under the /public directory
 	
@@ -71,5 +76,6 @@ app.get('/', function (req, res) {
 });
 
 console.log("Server running on port: " + port);
+
 
 
